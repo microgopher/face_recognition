@@ -1,0 +1,7 @@
+celery -A face_app purge
+sudo rabbitmqctl add_vhost our_app_vhost
+sudo rabbitmqctl add_user username password
+sudo rabbitmqctl set_permissions -p our_app_vhost username ".*" ".*" ".*"
+sudo rabbitmqctl set_user_tags username management
+BROKER_URL = 'amqp://username:password@localhost:5672/our_app_vhost'
+mongo devices --eval "db.dropDatabase()"

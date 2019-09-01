@@ -1,0 +1,76 @@
+<!DOCTYPE HTML>
+<html>                                                                           
+<head>                                                                           
+    <title>Faces</title>                                                   
+    <script type="text/javascript" src="http://code.jquery.com/jquery-1.4.2.min.js"></script>
+    <style>
+    table {
+        border-collapse: collapse;
+    }
+
+    table, th, td {
+        border: 1px solid black;
+    }
+    </style>
+    <script type="text/javascript" charset="utf-8">                              
+        $(document).ready(function(){                                                                                                             
+            if ("WebSocket" in window) {
+                console.log('hi');                                         
+                ws = new WebSocket("ws://" + document.domain + ":8765/sub");                
+                ws.onmessage = function (msg) {
+                    console.log(msg);
+                    face = JSON.parse(msg.data)
+                    table = document.getElementById('faces')
+                    
+                    if (face.topic == 'new'){
+                        new_row = table.rows[0].cloneNode(true);
+                        new_row.id = face.face_id
+                        new_row.cells[0].innerHTML = face.face_id;
+                        new_row.cells[1].innerHTML = "<img src='"+face.face_url+"'/>";
+                        new_row.cells[2].innerHTML = "";
+                        new_row.cells[3].innerHTML = "";
+                        new_row.cells[4].innerHTML = "";
+                        new_row.cells[5].innerHTML = "";
+                        table.appendChild( new_row );                                   
+                        //$("#faces").append("<div id='"+face.face_id+"'><span>"+face.face_id+"</span><img src='"+face.face_url+"'/><span id='error'/><span id='age'/><span id='gender'/><span id='parent'/></div>");
+                    }
+                    if (face.topic == 'update'){
+                       row = document.getElementById(face.face_id)
+                       if (row && face.error){
+                           row.cells[5].innerHTML = "Image is not face."
+                           //$("#"+face.face_id+" #error").text("Image is not face.");
+                       }
+                       if (row && face.age){
+                           row.cells[2].innerHTML = face.age[0][0].toString() + " second choice:" + face.age[1][0].toString();
+                           //#$("#"+face.face_id+" #age").text(face.age.toString());
+                       }
+                       if (row && face.gender){
+                           row.cells[3].innerHTML = face.gender[0][0];
+                           //$("#"+face.face_id+" #gender").text(face.gender.toString());
+                       }
+                       if (row && face.parent){
+                           row.cells[4].innerHTML = "<img src='"+face.parent_url+"'/>";
+                          //$("#"+face.face_id+" #parent").text("Duplicate face of "+face.parent);
+                       }
+                    }
+                };                                                               
+            } else {                                                             
+                alert("WebSocket not supported");                                
+            }                                                                    
+        });                                                                      
+    </script>                                                                    
+</head>                                                                          
+<body>                                                                           
+    <h1>Faces</h1>
+    <table id="faces" width="100%">
+      <tr>
+         <td>Id</td>
+         <td>Image</td>
+         <td>Age</td>
+         <td>Gender</td>
+         <td>Duplicate of </td>
+         <td>Error</td>
+      </tr>
+    </table>                                                                                                                                                                   
+</body>                                                                          
+</html>                 
